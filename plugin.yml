@@ -1,0 +1,5 @@
+main: com.drain.MCWebSocketPlugin.MCWebSocketPlugin
+name: MCWebSocketPlugin
+version: 1.0
+author: drain
+description: "Plugin that allows clients to listen in on server events via WebSocket"

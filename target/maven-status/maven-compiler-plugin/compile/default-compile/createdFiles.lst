@@ -1,0 +1,17 @@
+com\drain\MCWebSocketPlugin\CustomAppender.class
+com\drain\MCWebSocketPlugin\Dummy.class
+com\drain\MCWebSocketPlugin\messages\InMessage$OnlinePlayers$PlayerPair.class
+META-INF\org\apache\logging\log4j\core\config\plugins\Log4j2Plugins.dat
+com\drain\MCWebSocketPlugin\WSServer.class
+com\drain\MCWebSocketPlugin\messages\InMessage$OnlinePlayers.class
+com\drain\MCWebSocketPlugin\EventListener.class
+com\drain\MCWebSocketPlugin\messages\InMessage$1.class
+com\drain\MCWebSocketPlugin\messages\OnePlayerMessage.class
+com\drain\MCWebSocketPlugin\messages\PlayerChatMessage.class
+com\drain\MCWebSocketPlugin\messages\ConsoleMessage.class
+com\drain\MCWebSocketPlugin\messages\PlayerJoinMessage.class
+com\drain\MCWebSocketPlugin\messages\PlayerDeathMessage.class
+com\drain\MCWebSocketPlugin\MCWebSocketPlugin.class
+com\drain\MCWebSocketPlugin\messages\InMessage.class
+com\drain\MCWebSocketPlugin\messages\OutMessage.class
+com\drain\MCWebSocketPlugin\messages\PlayerQuitMessage.class
