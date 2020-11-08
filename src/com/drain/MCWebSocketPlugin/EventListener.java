@@ -8,21 +8,17 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import com.drain.MCWebSocketPlugin.messages.OutMessage;
 import com.drain.MCWebSocketPlugin.messages.PlayerChatMessage;
+import com.drain.MCWebSocketPlugin.messages.PlayerDeathMessage;
 import com.drain.MCWebSocketPlugin.messages.PlayerJoinMessage;
 import com.drain.MCWebSocketPlugin.messages.PlayerQuitMessage;
-import com.drain.MCWebSocketPlugin.messages.PlayerDeathMessage;
-import com.google.gson.Gson;
 
 public class EventListener implements Listener {
 
 	private MCWebSocketPlugin plugin;
-	private Gson gson;
-	
+
 	public EventListener(MCWebSocketPlugin plugin) {
 		this.plugin = plugin;
-		this.gson = new Gson();
 	}
 	
 	@EventHandler(priority=EventPriority.LOW)

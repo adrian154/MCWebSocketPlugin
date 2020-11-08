@@ -25,7 +25,7 @@ public class InMessage {
 	}
 	
 	public String execAuth(MCWebSocketPlugin plugin, WebSocket conn) {
-		if(secret != null && secret.equals("exi+EkWqZX+/JnCJNGMD1lIMkOneAEVpC4Pw719xDB951U0A8iInlPCiYKk2m3dZjPttI8dWKkVYtSuuoGf6WQ==")) {
+		if(secret != null && plugin.getConfiguration().verifyKey(secret)) {
 			plugin.getWSServer().authorize(conn);
 			return "";
 		} else {
@@ -72,8 +72,11 @@ public class InMessage {
 		
 	}
 	
+	// surely there's a more elegant way to do this, but I don't know of it
+	@SuppressWarnings("unused")
 	private static class OnlinePlayers {
 
+		// there's a warning but this will be serialized eventually
 		public List<PlayerPair> data;
 		
 		public OnlinePlayers(MCWebSocketPlugin plugin) {
@@ -87,6 +90,7 @@ public class InMessage {
 		
 		private static class PlayerPair {
 			
+			// see comment on `data`
 			public UUID uuid;
 			public String name;
 			

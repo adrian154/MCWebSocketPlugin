@@ -1,7 +1,5 @@
 package com.drain.MCWebSocketPlugin.messages;
 
-import org.apache.logging.log4j.Level;
-
 public class ConsoleMessage extends OutMessage {
 
 	public String threadName;
