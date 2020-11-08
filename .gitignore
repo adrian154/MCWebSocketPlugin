@@ -1,5 +1,9 @@
-.class
+*.class
+*.lst
+*.dat
+*.properties
 .metadata/
 .settings/
 .classpath
 .project
+.jar
