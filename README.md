@@ -10,6 +10,8 @@ The plugin exposes a WebSocketon port 1738. All messages are transferred as JSON
 
 All connected clients receive certain events.
 
+All messages have a `timestamp` field, which is a Unix epoch timestamp in milliseconds.
+
 ### join
 ```
 {
@@ -62,7 +64,7 @@ All connected clients receive certain events.
 
 ## Client to Server Messages
 
-All client to server messages require authentication besides `auth`. Failures will result in a message like this being sent:
+Certain messages require authorization. Failures will result in a message like this:
 
 ```
 {
@@ -80,14 +82,48 @@ All client to server messages require authentication besides `auth`. Failures wi
 ```
 
 ### message
+**Requires authentication.**
+`discordTag` is a Discord tag like `user#1234`. `message` is the message. This was added for the plugin's originally intended functionality, to enable communication between Discord and Minecraft.
+
+In Minecraft, it will be displayed like this:
+```
+[Discord] tag: message
+```
+
+`tag` is not validated, so you *could* put any text there.
+
 ```
 {
  type: "message",
  discordTag: <string tag>,
- 
+ message: <string message>
 }
 ```
 
 ### getOnline
+```
+{
+ type: "getOnline"
+}
+```
+
+**Response:**
+```
+{
+ data: [
+  {
+   name: <string playerName>,
+   UUID: <string playerUUID>
+  }
+ ]
+}
+```
 
 ### runCommand
+**Requires authentication.**
+```
+{
+ type: "runCommand",
+ command: <string command>
+}
+```
