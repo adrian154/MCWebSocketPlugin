@@ -3,6 +3,7 @@ name: MCWebSocketPlugin
 version: 1.0
 author: drain
 description: "Plugin that allows clients to listen in on server events via WebSocket"
+api-version: 1.16
 commands:
     wsreload:
         description: Reload the configuration for MCWebSocket
