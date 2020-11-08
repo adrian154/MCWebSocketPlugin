@@ -19,7 +19,7 @@ public class Configuration {
 	
 	public void reload() throws IOException {
 		
-		configFile = new File("MCWebSocket/config.txt");
+		configFile = new File("plugins/MCWebSocket/config.txt");
 		configFile.createNewFile();
 		keys.removeAll(keys);
 		
