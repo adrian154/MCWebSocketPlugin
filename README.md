@@ -4,7 +4,7 @@ A simple plugin I made for my Minecraft server. It exposes an API over WebSocket
 
 # API
 
-The plugin exposes a WebSocketon port 1738. All messages are transferred as JSON text.
+The plugin exposes a WebSocket on port 1738. All messages are transferred as JSON text.
 
 ## Server to Client Messages
 
