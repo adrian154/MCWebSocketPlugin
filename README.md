@@ -2,6 +2,10 @@
  
 A simple plugin I made for my Minecraft server. It exposes an API over WebSocket for monitoring and basic administration. I wrote it for a Discord bridge
 
+# Commands
+
+The configuration file can be safely reloaded using `/wsreload`. This command requires the permission node `mcwebsocket.reload`
+
 # API
 
 The plugin exposes a WebSocket on port 1738. All messages are transferred as JSON text.
