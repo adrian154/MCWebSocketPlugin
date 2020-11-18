@@ -64,6 +64,11 @@ public class MCWebSocketPlugin extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		System.out.println("Bye-bye from MCWebSocket.");
+		try {
+			this.wsServer.stop();
+		} catch(IOException | InterruptedException exception) {
+			System.out.println("Failed to stop websocket server: " + exception.getMessage());
+		}
 	}
 	
 	public WSServer getWSServer() {
