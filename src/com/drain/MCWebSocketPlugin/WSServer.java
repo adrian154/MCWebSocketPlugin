@@ -21,6 +21,8 @@ public class WSServer extends WebSocketServer {
 		super(addr);
 		this.plugin = plugin;
 		this.authedClients = new ArrayList<WebSocket>();
+		this.setReuseAddr(true);
+		this.start();
 		
 	}
 	

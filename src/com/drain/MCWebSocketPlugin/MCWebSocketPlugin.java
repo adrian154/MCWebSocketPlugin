@@ -49,7 +49,6 @@ public class MCWebSocketPlugin extends JavaPlugin {
 	
 	private void initWSServer() {
 		wsServer = new WSServer(new InetSocketAddress(1738), this);
-		wsServer.start();
 	}
 	
 	private void initLogger() {
