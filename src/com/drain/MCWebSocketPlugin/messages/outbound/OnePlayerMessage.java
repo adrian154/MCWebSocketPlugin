@@ -1,10 +1,10 @@
-package com.drain.MCWebSocketPlugin.messages;
+package com.drain.MCWebSocketPlugin.messages.outbound;
 
 import java.util.UUID;
 
 import org.bukkit.OfflinePlayer;
 
-public class OnePlayerMessage extends OutMessage {
+public class OnePlayerMessage extends OutboundMessage {
 
 	public UUID uuid;
 	public String playerName;

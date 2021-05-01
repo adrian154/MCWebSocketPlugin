@@ -1,4 +1,4 @@
-package com.drain.MCWebSocketPlugin.messages;
+package com.drain.MCWebSocketPlugin.messages.outbound;
 
 import org.bukkit.event.player.PlayerJoinEvent;
 

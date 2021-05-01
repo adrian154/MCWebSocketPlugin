@@ -7,48 +7,56 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.drain.MCWebSocketPlugin.commands.AddClientCommand;
 import com.drain.MCWebSocketPlugin.commands.ReloadCommand;
 import com.google.gson.Gson;
 
 public class MCWebSocketPlugin extends JavaPlugin {
 
-	private Configuration configuration;
+	private Configuration config;
 	private EventListener listener;
 	private WSServer wsServer;
 	private Gson gson;
+	private java.util.logging.Logger logger;
 	
+	// --- impled methods
 	@Override
 	public void onEnable() {
-		
 		initConfig();
-		initWSServer();
-		initEventListener();
+		initWebsockets();
+		initEvents();
 		initLogger();
 		initCommands();
-		
-		/* Set up common Gson instance */
-		gson = new Gson();
-		
-		System.out.println("Hello from MCWebSocket.");
-		
+		logger.info("Hello from MCWebSocket.");
 	}
 	
-	private void initConfig() {
+	@Override
+	public void onDisable() {
+		logger.info("Goodbye from MCWebSocket.");
 		try {
-			configuration = new Configuration();
-		} catch(IOException exception) {
-			System.out.println("Failed to load configuration file: " + exception.getMessage());
-			System.out.println("The plugin will function normally, but no applications will be able to authenticate or subscribe to authorized events.");
+			this.wsServer.stop();
+			this.config.save();
+		} catch(IOException | InterruptedException exception) {
+			logger.severe("Something went wrong while shutting down. You should probably look into it.");
+			logger.severe(exception.toString());
 		}
 	}
 	
-	private void initEventListener() {
-		this.listener = new EventListener(this);
-		this.getServer().getPluginManager().registerEvents(this.listener, this);
+	private void initConfig() throws RuntimeException {
+		try {
+			config = new Configuration(this);
+		} catch(IOException exception) {
+			throw new RuntimeException("Failed to load configuration file: " + exception.getMessage());
+		}
 	}
 	
-	private void initWSServer() {
-		wsServer = new WSServer(new InetSocketAddress(1738), this);
+	private void initWebsockets() {
+		wsServer = new WSServer(new InetSocketAddress(config.getPort()), this);
+	}
+	
+	private void initEvents() {
+		this.listener = new EventListener(this);
+		this.getServer().getPluginManager().registerEvents(this.listener, this);
 	}
 	
 	private void initLogger() {
@@ -57,19 +65,11 @@ public class MCWebSocketPlugin extends JavaPlugin {
 	}
 	
 	private void initCommands() {
-		this.getCommand("wsreload").setExecutor(new ReloadCommand(this));
+		this.getCommand("mcws-reload").setExecutor(new ReloadCommand(this));
+		this.getCommand("mcws-addclient").setExecutor(new AddClientCommand(this));
 	}
 	
-	@Override
-	public void onDisable() {
-		System.out.println("Bye-bye from MCWebSocket.");
-		try {
-			this.wsServer.stop();
-		} catch(IOException | InterruptedException exception) {
-			System.out.println("Failed to stop websocket server: " + exception.getMessage());
-		}
-	}
-	
+	// --- methods
 	public WSServer getWSServer() {
 		return wsServer;
 	}
@@ -78,8 +78,8 @@ public class MCWebSocketPlugin extends JavaPlugin {
 		return gson;
 	}
 	
-	public Configuration getConfiguration() {
-		return configuration;
+	public Configuration getMCWSConfig() {
+		return config;
 	}
 	
 }

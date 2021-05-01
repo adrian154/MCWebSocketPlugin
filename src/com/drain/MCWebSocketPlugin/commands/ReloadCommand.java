@@ -22,10 +22,11 @@ public class ReloadCommand implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		
 		try {
-			plugin.getConfiguration().reload();
+			plugin.getMCWSConfig().reload();
 			sender.sendMessage(ChatColor.GREEN + "Reloaded configuration successfully!");
 		} catch(IOException exception) {
-			sender.sendMessage(ChatColor.RED + "Failed to reload configuration. Are you sure the file exists?");
+			sender.sendMessage(ChatColor.RED + "Failed to reload configuration. Check the server's logs for more info.");
+			plugin.getLogger().severe(exception.getMessage());
 		}
 		
 		return true;

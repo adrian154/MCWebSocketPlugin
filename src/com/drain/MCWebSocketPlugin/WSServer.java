@@ -1,29 +1,28 @@
 package com.drain.MCWebSocketPlugin;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
-import com.drain.MCWebSocketPlugin.messages.InMessage;
-import com.drain.MCWebSocketPlugin.messages.OutMessage;
+import com.drain.MCWebSocketPlugin.Configuration.AccessLevel;
+import com.drain.MCWebSocketPlugin.messages.inbound.InboundMessage;
+import com.drain.MCWebSocketPlugin.messages.outbound.OutboundMessage;
 
 public class WSServer extends WebSocketServer {
 
 	private MCWebSocketPlugin plugin;
-	private List<WebSocket> authedClients;
-
+	private Map<WebSocket, AccessLevel> clients;
+	
 	public WSServer(InetSocketAddress addr, MCWebSocketPlugin plugin) {
-		
 		super(addr);
 		this.plugin = plugin;
-		this.authedClients = new ArrayList<WebSocket>();
+		this.clients = new HashMap<WebSocket, AccessLevel>();
 		this.setReuseAddr(true);
 		this.start();
-		
 	}
 	
 	public WSServer(InetSocketAddress address) {
@@ -32,26 +31,23 @@ public class WSServer extends WebSocketServer {
 
 	@Override
 	public void onClose(WebSocket conn, int arg1, String reason, boolean remote) {
-		authedClients.remove(conn);
+		clients.remove(conn);
 	}
 
 	@Override
 	public void onError(WebSocket conn, Exception ex) {
-		System.out.println("an error occured on connection with " + conn.getRemoteSocketAddress() + ": " + ex.getMessage());
+		plugin.getLogger().warning("An error occured on connection with " + conn.getRemoteSocketAddress() + ": " + ex.getMessage());
 	}
 
 	@Override
-	public void onMessage(WebSocket conn, String strMessage) {
-		InMessage message = plugin.getGson().fromJson(strMessage, InMessage.class);
-		String response = message.execute(plugin, conn);
-		if(response.length() > 0) {
-			conn.send(response);
-		}
+	public void onMessage(WebSocket socket, String strMessage) {
+		InboundMessage message = plugin.getGson().fromJson(strMessage, InboundMessage.class);
+		message.execute(plugin, socket);
 	}
 
 	@Override
-	public void onOpen(WebSocket conn, ClientHandshake handshake) {
-		System.out.println("connection from " + conn.getRemoteSocketAddress());
+	public void onOpen(WebSocket socket, ClientHandshake handshake) {
+		clients.put(socket, plugin.getMCWSConfig().getDefaultAccess());
 	}
 
 	@Override
@@ -59,23 +55,20 @@ public class WSServer extends WebSocketServer {
 		System.out.println("started listening for WebSocket connections");
 	}
 
-	public void authorize(WebSocket conn) {
-		if(!authedClients.contains(conn)) {
-			authedClients.add(conn);
-		}
+	public AccessLevel getAccess(WebSocket socket) {
+		return clients.containsKey(socket) ? clients.get(socket) : AccessLevel.NONE;
 	}
 	
-	public boolean isAuthorized(WebSocket conn) {
-		return authedClients.contains(conn);
+	public void setAccess(WebSocket conn, AccessLevel level) {
+		clients.put(conn, level);
 	}
 	
-	public void broadcastMessage(OutMessage message) {
-		broadcast(plugin.getGson().toJson(message));
-	}
-	
-	public void broadcastMessageToAuthed(OutMessage message) {
-		for(WebSocket conn: authedClients) {
-			conn.send(plugin.getGson().toJson(message));
+	public void broadcastMessage(OutboundMessage message, AccessLevel minimum) {
+		String json = plugin.getGson().toJson(message);
+		for(WebSocket conn: clients.keySet()) {
+			if(clients.get(conn).allows(minimum)) {
+				conn.send(json);
+			}
 		}
 	}
 	
