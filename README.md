@@ -2,6 +2,8 @@
 
 MCWebSocket aims to provide a simple platform for building Websocket-based Minecraft integrations.
 
+[**Download it here!**](https://github.com/adrian154/MCWebSocketPlugin/releases/tag/1.0.0)
+
 # Basic usage
 
 The MCWS protocol is very simple. Clients connect to the server and send requests; the server replies with messages indicating whether the request was successful. The server will also send game events like player deaths or console messages.
