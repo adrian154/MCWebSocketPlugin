@@ -116,6 +116,7 @@ public class Configuration {
 			clients = new HashMap<String, Client>();
 			outgoingHosts = new ArrayList<String>();
 			port = 17224;
+			defaultAccess = AccessLevel.NONE.ordinal();
 			defaultAccessLevel = AccessLevel.NONE;
 		}
 		

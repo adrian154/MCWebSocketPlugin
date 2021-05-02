@@ -16,6 +16,7 @@ import com.drain.MCWebSocketPlugin.Configuration.AccessLevel;
 import com.drain.MCWebSocketPlugin.Configuration.Client;
 import com.drain.MCWebSocketPlugin.messages.inbound.InboundMessage;
 import com.drain.MCWebSocketPlugin.messages.outbound.OutboundMessage;
+import com.google.gson.JsonSyntaxException;
 
 public class WSServer extends WebSocketServer {
 
@@ -29,6 +30,7 @@ public class WSServer extends WebSocketServer {
 		super(addr);
 		this.plugin = plugin;
 		this.clients = new HashMap<WebSocket, Client>();
+		this.outgoing = new HashMap<String, WebSocket>();
 		this.setReuseAddr(true);
 		this.start();
 		this.connectOutgoing();
@@ -49,6 +51,7 @@ public class WSServer extends WebSocketServer {
 			if(socket == null || !socket.isOpen()) {
 				try {
 					outgoing.put(host, new OutgoingClient(host, this));
+					plugin.getLogger().info("Connected to " + host);
 				} catch(URISyntaxException exception) {
 					plugin.getLogger().warning(String.format("Invalid host url \"%s\": %s", host, exception.getMessage()));
 				}
@@ -88,8 +91,12 @@ public class WSServer extends WebSocketServer {
 
 	@Override
 	public void onMessage(WebSocket socket, String strMessage) {
-		InboundMessage message = plugin.getGson().fromJson(strMessage, InboundMessage.class);
-		message.execute(plugin, socket, strMessage);
+		try {
+			InboundMessage message = plugin.getGson().fromJson(strMessage, InboundMessage.class);
+			message.execute(plugin, socket, strMessage);
+		} catch(JsonSyntaxException excption) {
+			plugin.getLogger().warning("Ignoring malformed message");
+		}
 	}
 
 	@Override
@@ -108,6 +115,7 @@ public class WSServer extends WebSocketServer {
 		public OutgoingClient(String host, WSServer server) throws URISyntaxException {
 			super(new URI(host));
 			this.server = server;
+			this.connect();
 		}
 
 		@Override

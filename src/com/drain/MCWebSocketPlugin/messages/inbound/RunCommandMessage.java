@@ -11,12 +11,18 @@ public class RunCommandMessage extends InboundMessage {
 	
 	@Override
 	public void handle(MCWebSocketPlugin plugin, WebSocket socket) {
-		if(command != null && plugin.getWSServer().getAccess(socket).contains(AccessLevel.CONSOLE)) {
+		
+		if(!plugin.getWSServer().getAccess(socket).contains(AccessLevel.CONSOLE)) { 
+			socket.send(NOT_AUTHORIZED);
+		}
+		
+		if(command != null) {
 			plugin.getServer().getScheduler().runTask(plugin, new RunCommandTask(plugin, command));
 			socket.send(SUCCESS);
 		} else {
 			socket.send(INVALID_FIELDS);
 		}
+		
 	}
 	
 	private static class RunCommandTask implements Runnable {

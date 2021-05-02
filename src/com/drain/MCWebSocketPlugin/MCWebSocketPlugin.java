@@ -9,6 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.drain.MCWebSocketPlugin.commands.AddClientCommand;
 import com.drain.MCWebSocketPlugin.commands.ReloadCommand;
+import com.drain.MCWebSocketPlugin.commands.StatusCommand;
 import com.google.gson.Gson;
 
 public class MCWebSocketPlugin extends JavaPlugin {
@@ -70,6 +71,7 @@ public class MCWebSocketPlugin extends JavaPlugin {
 	private void initCommands() {
 		this.getCommand("mcws-reload").setExecutor(new ReloadCommand(this));
 		this.getCommand("mcws-addclient").setExecutor(new AddClientCommand(this));
+		this.getCommand("mcws-status").setExecutor(new StatusCommand(this));
 	}
 	
 	// --- public methods
