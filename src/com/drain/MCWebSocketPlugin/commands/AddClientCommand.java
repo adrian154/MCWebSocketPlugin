@@ -43,7 +43,7 @@ public class AddClientCommand implements CommandExecutor {
 		
 		try {
 			plugin.getMCWSConfig().addCredentials(args[0], keyBuffer, level);
-			sender.sendMessage(ChatColor.GREEN + "Generated new client. Its secret key is " + ChatColor.YELLOW + Base64.getEncoder().encode(keyBuffer));
+			sender.sendMessage(ChatColor.GREEN + "Generated new client. Its secret key is " + ChatColor.YELLOW + Base64.getEncoder().encodeToString(keyBuffer));
 			sender.sendMessage(ChatColor.RED + "Store this key right now, as you will not be able to access it again. Make sure it hasn't been logged somewhere on your machine.");
 		} catch(IOException exception) {
 			sender.sendMessage(ChatColor.RED + "Failed to save configuration file while adding new client.");

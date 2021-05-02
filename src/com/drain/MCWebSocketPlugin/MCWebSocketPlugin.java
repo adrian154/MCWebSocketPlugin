@@ -22,6 +22,8 @@ public class MCWebSocketPlugin extends JavaPlugin {
 	// --- impled methods
 	@Override
 	public void onEnable() {
+		this.logger = getLogger();
+		this.gson = new Gson();
 		initConfig();
 		initWebsockets();
 		initEvents();
@@ -35,7 +37,6 @@ public class MCWebSocketPlugin extends JavaPlugin {
 		logger.info("Goodbye from MCWebSocket.");
 		try {
 			this.wsServer.stop();
-			this.config.save();
 		} catch(IOException | InterruptedException exception) {
 			logger.severe("Something went wrong while shutting down. You should probably look into it.");
 			logger.severe(exception.toString());
@@ -44,9 +45,10 @@ public class MCWebSocketPlugin extends JavaPlugin {
 	
 	private void initConfig() throws RuntimeException {
 		try {
-			config = new Configuration(this);
+			config = new Configuration();
 		} catch(IOException exception) {
-			throw new RuntimeException("Failed to load configuration file: " + exception.getMessage());
+			exception.printStackTrace();
+			throw new RuntimeException("Failed to initialize configuration!");
 		}
 	}
 	

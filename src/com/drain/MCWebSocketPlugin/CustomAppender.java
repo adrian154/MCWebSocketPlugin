@@ -31,12 +31,12 @@ public class CustomAppender extends AbstractAppender {
 	@Override
 	public void append(LogEvent event) {	
 		event = event.toImmutable();
-		event.getSource().getClassName();
+		StackTraceElement source = event.getSource();
 		plugin.getWSServer().broadcastMessage(new ConsoleMessage(
 			event.getThreadName(),
 			event.getLevel().toString(),
 			event.getMessage().getFormattedMessage(),
-			event.getSource().getClassName()
+			source != null ? source.getClassName() : ""
 		), AccessLevel.ALL_EVENTS);
 	}
 	

@@ -5,7 +5,11 @@ author: drain
 description: "Plugin that allows clients to listen in on server events via WebSocket"
 api-version: 1.16
 commands:
-    wsreload:
+    mcws-reload:
         description: Reload the configuration for MCWebSocket
-        usage: /wsreload
-        permission: mcwebsocket.reload
+        usage: /mcws-reload
+        permission: mcws.reload
+    mcws-addclient:
+        description: Creates a new MCWS client
+        usage: /mcws-addclient <client name> <access level>
+        permission: mcws.addclient

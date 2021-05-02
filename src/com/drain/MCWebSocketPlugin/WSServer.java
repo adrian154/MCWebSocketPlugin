@@ -42,7 +42,7 @@ public class WSServer extends WebSocketServer {
 	@Override
 	public void onMessage(WebSocket socket, String strMessage) {
 		InboundMessage message = plugin.getGson().fromJson(strMessage, InboundMessage.class);
-		message.execute(plugin, socket);
+		message.execute(plugin, socket, strMessage);
 	}
 
 	@Override

@@ -8,14 +8,19 @@ import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class Configuration {
 
+	private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+	
 	public static enum AccessLevel {
 		
 		NONE(0),
@@ -40,14 +45,10 @@ public class Configuration {
 	};
 	
 	private ConfigContainer config;
-	private Gson gson;
 	private File configFile;
 	private MessageDigest keyHasher;
-	private MCWebSocketPlugin plugin;
-	
-	public Configuration(MCWebSocketPlugin plugin) throws IOException {
-		this.plugin = plugin;
-		this.gson = new Gson();
+
+	public Configuration() throws IOException {
 		this.configFile = new File("plugins/MCWebSocket/config.json");
 		try {
 			this.keyHasher = MessageDigest.getInstance("SHA-256");
@@ -67,6 +68,13 @@ public class Configuration {
 		return keyHasher.digest(key);
 	}
 	
+	private Client getClient(String name) {
+		if(!config.clients.containsKey(name)) {
+			throw new IllegalArgumentException("No such client.");
+		}
+		return config.clients.get(name);
+	}
+	
 	// --- methods
 	public void reload() throws IOException {
 		if(configFile.exists()) {
@@ -75,62 +83,85 @@ public class Configuration {
 			config.afterLoad();
 		} else {
 			config = new ConfigContainer();
+			File directory = new File("plugins/MCWebSocket");
+			if(!directory.exists()) {
+				directory.mkdir();
+			}
 			configFile.createNewFile();
 			save();
 		}
 	}
 	
 	public void addCredentials(String clientID, byte[] key, AccessLevel level) throws IOException {
-		config.keys.put(clientID, hashKey(key));
-		config.accessLevels.put(clientID, level);
+		config.clients.put(clientID, new Client(key, level));
 		save();
 	}
 	
 	public boolean authClient(String clientID, byte[] key) {
-		return config.keys.get(clientID).equals(hashKey(key));
+		
+		byte[] hashed = hashKey(key);
+		byte[] secretHash = getClient(clientID).secretHash;
+		
+		// a pitiful attempt at an equal time comparison
+		boolean equal = true;
+		for(int i = 0; i < hashed.length; i++) {
+			if(hashed[i] != secretHash[i]) equal = false;
+		}
+		
+		return equal;
+	
 	}
 	
 	public List<String> getOutgoingHosts() { return config.outgoingHosts; }
 	public int getPort() { return config.port; }
-	public AccessLevel getAccess(String clientID) { return config.accessLevels.get(clientID); }
-	public AccessLevel getDefaultAccess() { return config.defaultAccess; }
+	public AccessLevel getDefaultAccess() { return config.defaultAccessLevel; }
+	public AccessLevel getAccess(String clientID) { return getClient(clientID).access; }
 	
 	// --- classes
 	private class ConfigContainer {
 		
-		public Map<String, byte[]> keys;
-		public Map<String, AccessLevel> accessLevels;
+		public Map<String, Client> clients;
 		public List<String> outgoingHosts;
-		public AccessLevel defaultAccess;
-		public int defaultAccessInt;
+		public transient AccessLevel defaultAccessLevel;
+		public int defaultAccess;
 		public int port;
 		
 		public ConfigContainer() {
-			keys = new HashMap<String, byte[]>();
-			accessLevels = new HashMap<String, AccessLevel>();
+			clients = new HashMap<String, Client>();
 			outgoingHosts = new ArrayList<String>();
 			port = 17224; // :)
-			defaultAccess = AccessLevel.NONE;
+			defaultAccessLevel = AccessLevel.NONE;
 		}
 		
 		public void afterLoad() {
-			
-			defaultAccess = AccessLevel.fromInt(defaultAccessInt);
-			
-			for(String clientID: accessLevels.keySet()) {
-				if(!keys.containsKey(clientID)) {
-					plugin.getLogger().warning(String.format("Removing access for client %s since it has no key", clientID));
-					accessLevels.remove(clientID);
-				}
+			defaultAccessLevel = AccessLevel.fromInt(defaultAccess);
+			for(Client client: clients.values()) {
+				client.complete();
 			}
-			
-			for(String clientID: keys.keySet()) {
-				if(!accessLevels.containsKey(clientID)) {
-					plugin.getLogger().warning(String.format("Resetting access for client %s to default level %s since it is missing from the accessLevels map", clientID, defaultAccess.toString()));
-					accessLevels.put(clientID, defaultAccess);
-				}
+		}
+		
+	}
+	
+	private class Client {
+		
+		public int accessLevel;
+		public String keyHash;
+		
+		public transient byte[] secretHash;
+		public transient AccessLevel access;
+		
+		public Client(byte[] secret, AccessLevel access) {
+			this.accessLevel = access.ordinal();
+			this.keyHash = Base64.getEncoder().encodeToString(hashKey(secret));
+		}
+		
+		// finish deserialization process
+		public void complete() {
+			if(keyHash == null) {
+				throw new IllegalArgumentException("Client has no key!");
 			}
-			
+			this.secretHash = Base64.getDecoder().decode(keyHash);
+			this.access = AccessLevel.fromInt(accessLevel);
 		}
 		
 	}
