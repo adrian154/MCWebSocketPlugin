@@ -24,6 +24,11 @@ public class AddClientCommand implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
+		if(!sender.hasPermission("mcws.addclient")) {
+			sender.sendMessage(ChatColor.RED + "Insufficient permissions.");
+			return true;
+		}
+		
 		if(args.length != 2) {
 			sender.sendMessage(ChatColor.RED + "Usage: /mcws-addclient <name> <access level>");
 			return true;

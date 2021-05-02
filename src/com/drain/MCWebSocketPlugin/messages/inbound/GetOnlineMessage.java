@@ -15,7 +15,7 @@ public class GetOnlineMessage extends InboundMessage {
 	@Override
 	public void handle(MCWebSocketPlugin plugin, WebSocket socket) {
 		
-		if(plugin.getWSServer().getAccess(socket).allows(AccessLevel.GAME_INFO)) {
+		if(plugin.getWSServer().getAccess(socket).contains(AccessLevel.GAME_INFO)) {
 			
 			List<PlayerPair> players = plugin.getServer().getOnlinePlayers()
 				.stream()

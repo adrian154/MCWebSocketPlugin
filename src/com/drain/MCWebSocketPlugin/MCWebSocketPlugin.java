@@ -43,6 +43,7 @@ public class MCWebSocketPlugin extends JavaPlugin {
 		}
 	}
 	
+	// --- private methods
 	private void initConfig() throws RuntimeException {
 		try {
 			config = new Configuration();
@@ -71,7 +72,7 @@ public class MCWebSocketPlugin extends JavaPlugin {
 		this.getCommand("mcws-addclient").setExecutor(new AddClientCommand(this));
 	}
 	
-	// --- methods
+	// --- public methods
 	public WSServer getWSServer() {
 		return wsServer;
 	}

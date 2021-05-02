@@ -2,7 +2,7 @@ main: com.drain.MCWebSocketPlugin.MCWebSocketPlugin
 name: MCWebSocketPlugin
 version: 1.0
 author: drain
-description: "Plugin that allows clients to listen in on server events via WebSocket"
+description: "Platform for building websocket-based integrations for Minecraft"
 api-version: 1.16
 commands:
     mcws-reload:
@@ -13,3 +13,7 @@ commands:
         description: Creates a new MCWS client
         usage: /mcws-addclient <client name> <access level>
         permission: mcws.addclient
+    mcws-status:
+        description: Lists clients currently connected to the server through MCWS
+        usage: /mcws-status
+        permission: mcws.status

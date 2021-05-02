@@ -37,7 +37,7 @@ public class CustomAppender extends AbstractAppender {
 			event.getLevel().toString(),
 			event.getMessage().getFormattedMessage(),
 			source != null ? source.getClassName() : ""
-		), AccessLevel.ALL_EVENTS);
+		), AccessLevel.CONSOLE_READONLY);
 	}
 	
 	@Override

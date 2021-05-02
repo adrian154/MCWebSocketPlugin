@@ -1,42 +1,89 @@
 package com.drain.MCWebSocketPlugin;
 
 import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.java_websocket.WebSocket;
+import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ClientHandshake;
+import org.java_websocket.handshake.ServerHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 import com.drain.MCWebSocketPlugin.Configuration.AccessLevel;
+import com.drain.MCWebSocketPlugin.Configuration.Client;
 import com.drain.MCWebSocketPlugin.messages.inbound.InboundMessage;
 import com.drain.MCWebSocketPlugin.messages.outbound.OutboundMessage;
 
 public class WSServer extends WebSocketServer {
 
+	// --- fields
 	private MCWebSocketPlugin plugin;
-	private Map<WebSocket, AccessLevel> clients;
+	private Map<WebSocket, Client> clients;
+	private Map<String, WebSocket> outgoing;
 	
+	// --- constructors
 	public WSServer(InetSocketAddress addr, MCWebSocketPlugin plugin) {
 		super(addr);
 		this.plugin = plugin;
-		this.clients = new HashMap<WebSocket, AccessLevel>();
+		this.clients = new HashMap<WebSocket, Client>();
 		this.setReuseAddr(true);
 		this.start();
+		this.connectOutgoing();
+	}
+
+	// --- public methods
+	public Client getClient(WebSocket socket) {
+		return clients.get(socket);
 	}
 	
-	public WSServer(InetSocketAddress address) {
-		super(address);
+	public Map<WebSocket, Client> getClients() {
+		return clients;
+	}
+	
+	public void connectOutgoing() {
+		for(String host: plugin.getMCWSConfig().getOutgoingHosts()) {
+			WebSocket socket = outgoing.get(host);
+			if(socket == null || !socket.isOpen()) {
+				try {
+					outgoing.put(host, new OutgoingClient(host, this));
+				} catch(URISyntaxException exception) {
+					plugin.getLogger().warning(String.format("Invalid host url \"%s\": %s", host, exception.getMessage()));
+				}
+			}
+		}
+	}
+
+	public AccessLevel getAccess(WebSocket socket) {
+		Client client = clients.get(socket);
+		if(client == null) return AccessLevel.NONE;
+		return client.getAccess();
+	}
+	
+	public void authClient(WebSocket socket, Client client) {
+		clients.put(socket, client);
+	}
+	
+	public void broadcastMessage(OutboundMessage message, AccessLevel minimum) {
+		String json = plugin.getGson().toJson(message);
+		for(WebSocket conn: clients.keySet()) {
+			if(clients.get(conn).getAccess().contains(minimum)) {
+				conn.send(json);
+			}
+		}
+	}
+
+	// --- implemented methods
+	@Override
+	public void onClose(WebSocket socket, int code, String reason, boolean remote) {
+		clients.remove(socket);
 	}
 
 	@Override
-	public void onClose(WebSocket conn, int arg1, String reason, boolean remote) {
-		clients.remove(conn);
-	}
-
-	@Override
-	public void onError(WebSocket conn, Exception ex) {
-		plugin.getLogger().warning("An error occured on connection with " + conn.getRemoteSocketAddress() + ": " + ex.getMessage());
+	public void onError(WebSocket socket, Exception ex) {
+		// TODO: logging
 	}
 
 	@Override
@@ -46,30 +93,41 @@ public class WSServer extends WebSocketServer {
 	}
 
 	@Override
-	public void onOpen(WebSocket socket, ClientHandshake handshake) {
-		clients.put(socket, plugin.getMCWSConfig().getDefaultAccess());
-	}
+	public void onOpen(WebSocket socket, ClientHandshake handshake) { }
 
 	@Override
 	public void onStart() {
-		System.out.println("started listening for WebSocket connections");
-	}
-
-	public AccessLevel getAccess(WebSocket socket) {
-		return clients.containsKey(socket) ? clients.get(socket) : AccessLevel.NONE;
+		plugin.getLogger().info("Started listening for websocket connections");
 	}
 	
-	public void setAccess(WebSocket conn, AccessLevel level) {
-		clients.put(conn, level);
-	}
-	
-	public void broadcastMessage(OutboundMessage message, AccessLevel minimum) {
-		String json = plugin.getGson().toJson(message);
-		for(WebSocket conn: clients.keySet()) {
-			if(clients.get(conn).allows(minimum)) {
-				conn.send(json);
-			}
+	// --- inner classes
+	private class OutgoingClient extends WebSocketClient {
+		
+		private WSServer server;
+		
+		public OutgoingClient(String host, WSServer server) throws URISyntaxException {
+			super(new URI(host));
+			this.server = server;
 		}
+
+		@Override
+		public void onOpen(ServerHandshake handshake) { }
+		
+		@Override
+		public void onMessage(String message) {
+			server.onMessage(this, message);
+		}
+		
+		@Override
+		public void onClose(int code, String reason, boolean remote) {
+			clients.remove(this);
+		}
+		
+		@Override
+		public void onError(Exception exception) {
+			// TODO: logging
+		}
+		
 	}
 	
 }

@@ -21,11 +21,17 @@ public class ReloadCommand implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		
+		if(!sender.hasPermission("mcws.reload")) {
+			sender.sendMessage(ChatColor.RED + "Insufficient permissions.");
+			return true;
+		}
+		
 		try {
 			plugin.getMCWSConfig().reload();
-			sender.sendMessage(ChatColor.GREEN + "Reloaded configuration successfully!");
+			plugin.getWSServer().connectOutgoing();
+			sender.sendMessage(ChatColor.GREEN + "Finished reloading!");
 		} catch(IOException exception) {
-			sender.sendMessage(ChatColor.RED + "Failed to reload configuration. Check the server's logs for more info.");
+			sender.sendMessage(ChatColor.RED + "Failed to restart MCWS. Check the server's logs for more info.");
 			plugin.getLogger().severe(exception.getMessage());
 		}
 		

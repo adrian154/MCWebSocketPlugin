@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -19,21 +18,24 @@ import com.google.gson.GsonBuilder;
 
 public class Configuration {
 
+	// --- static fields
 	private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 	
+	// To add new access levels, just add a new enum and bump the permission levels on the default ones
+	// TODO: Better access control.
 	public static enum AccessLevel {
 		
 		NONE(0),
 		GAME_INFO(1),
-		ALL_EVENTS(2),
-		FULL_ACCESS(3);
+		CONSOLE_READONLY(2),
+		CONSOLE(3);
 		
 		private int level;
 		private AccessLevel(int level) {
 			this.level = level;
 		}
 		
-		public boolean allows(AccessLevel level) {
+		public boolean contains(AccessLevel level) {
 			return this.level >= level.level;
 		}
 		
@@ -44,38 +46,37 @@ public class Configuration {
 		
 	};
 	
+	// --- fields
 	private ConfigContainer config;
 	private File configFile;
-	private MessageDigest keyHasher;
-
+	private static final MessageDigest keyHasher;
+	
+	static {
+		try {
+			keyHasher = MessageDigest.getInstance("SHA-256");
+		} catch(NoSuchAlgorithmException exception) {
+			throw new RuntimeException("Couldn't create key hash.");
+		}
+	}
+	
+	// --- constructors
 	public Configuration() throws IOException {
 		this.configFile = new File("plugins/MCWebSocket/config.json");
-		try {
-			this.keyHasher = MessageDigest.getInstance("SHA-256");
-		} catch(NoSuchAlgorithmException exception) {
-			throw new RuntimeException("Could not get create message digest for hashing API secrets.");
-		}
 		this.reload();
 	}
 	
+	// --- private methods
+	private static byte[] hashKey(byte[] key) {
+		return keyHasher.digest(key);
+	}
+	
+	// --- public methods
 	public void save() throws IOException {
 		PrintWriter pw = new PrintWriter(configFile.getPath());
 		pw.println(gson.toJson(config));
 		pw.close();
 	}
-	
-	private byte[] hashKey(byte[] key) {
-		return keyHasher.digest(key);
-	}
-	
-	private Client getClient(String name) {
-		if(!config.clients.containsKey(name)) {
-			throw new IllegalArgumentException("No such client.");
-		}
-		return config.clients.get(name);
-	}
-	
-	// --- methods
+
 	public void reload() throws IOException {
 		if(configFile.exists()) {
 			String json = new String(Files.readAllBytes(configFile.toPath()), StandardCharsets.UTF_8);
@@ -93,31 +94,16 @@ public class Configuration {
 	}
 	
 	public void addCredentials(String clientID, byte[] key, AccessLevel level) throws IOException {
-		config.clients.put(clientID, new Client(key, level));
+		config.clients.put(clientID, new Client(key, level, clientID));
 		save();
 	}
-	
-	public boolean authClient(String clientID, byte[] key) {
-		
-		byte[] hashed = hashKey(key);
-		byte[] secretHash = getClient(clientID).secretHash;
-		
-		// a pitiful attempt at an equal time comparison
-		boolean equal = true;
-		for(int i = 0; i < hashed.length; i++) {
-			if(hashed[i] != secretHash[i]) equal = false;
-		}
-		
-		return equal;
-	
-	}
-	
+
 	public List<String> getOutgoingHosts() { return config.outgoingHosts; }
 	public int getPort() { return config.port; }
 	public AccessLevel getDefaultAccess() { return config.defaultAccessLevel; }
-	public AccessLevel getAccess(String clientID) { return getClient(clientID).access; }
+	public Client getClient(String name) { return config.clients.get(name); }
 	
-	// --- classes
+	// --- inner classes
 	private class ConfigContainer {
 		
 		public Map<String, Client> clients;
@@ -129,7 +115,7 @@ public class Configuration {
 		public ConfigContainer() {
 			clients = new HashMap<String, Client>();
 			outgoingHosts = new ArrayList<String>();
-			port = 17224; // :)
+			port = 17224;
 			defaultAccessLevel = AccessLevel.NONE;
 		}
 		
@@ -142,20 +128,28 @@ public class Configuration {
 		
 	}
 	
-	private class Client {
+	public static class Client {
+		 
+		// json fields
+		private int accessLevel;
+		private String keyHash;
+		private String clientID;
 		
-		public int accessLevel;
-		public String keyHash;
+		// real fields
+		private transient byte[] secretHash;
+		private transient AccessLevel access;
 		
-		public transient byte[] secretHash;
-		public transient AccessLevel access;
-		
-		public Client(byte[] secret, AccessLevel access) {
+		public Client(byte[] secret, AccessLevel access, String clientID) {
+			this.secretHash = hashKey(secret);
+			this.access = access;
 			this.accessLevel = access.ordinal();
-			this.keyHash = Base64.getEncoder().encodeToString(hashKey(secret));
+			this.keyHash = Base64.getEncoder().encodeToString(secretHash);
+			this.clientID = clientID;
 		}
 		
 		// finish deserialization process
+		// GSON *does* have provisions for functionality like this BUT...
+		// for the sake of simplicity, I opted for the caveman approach
 		public void complete() {
 			if(keyHash == null) {
 				throw new IllegalArgumentException("Client has no key!");
@@ -163,6 +157,23 @@ public class Configuration {
 			this.secretHash = Base64.getDecoder().decode(keyHash);
 			this.access = AccessLevel.fromInt(accessLevel);
 		}
+		
+		public boolean auth(byte[] key) {
+			
+			byte[] hashed = hashKey(key);
+			
+			// a pitiful attempt at an equal time comparison
+			boolean equal = true;
+			for(int i = 0; i < hashed.length; i++) {
+				if(hashed[i] != secretHash[i]) equal = false;
+			}
+			
+			return equal;
+
+		}
+		
+		public String getID() { return clientID; }
+		public AccessLevel getAccess() { return access; }
 		
 	}
 

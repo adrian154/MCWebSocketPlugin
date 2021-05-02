@@ -11,7 +11,7 @@ public class RunCommandMessage extends InboundMessage {
 	
 	@Override
 	public void handle(MCWebSocketPlugin plugin, WebSocket socket) {
-		if(command != null && plugin.getWSServer().getAccess(socket).allows(AccessLevel.FULL_ACCESS)) {
+		if(command != null && plugin.getWSServer().getAccess(socket).contains(AccessLevel.CONSOLE)) {
 			plugin.getServer().getScheduler().runTask(plugin, new RunCommandTask(plugin, command));
 			socket.send(SUCCESS);
 		} else {
