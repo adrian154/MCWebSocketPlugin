@@ -42,6 +42,11 @@ public class AddClientCommand implements CommandExecutor {
 			return true;
 		}
 			
+		if(plugin.getMCWSConfig().getClient(args[0]) != null) {
+			sender.sendMessage(ChatColor.RED + "A client with that ID exists already!");
+			return true;
+		}
+		
 		SecureRandom random = new SecureRandom();
 		byte[] keyBuffer = new byte[64];
 		random.nextBytes(keyBuffer);
