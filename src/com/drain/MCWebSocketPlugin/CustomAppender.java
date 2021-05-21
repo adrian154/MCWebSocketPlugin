@@ -20,7 +20,7 @@ public class CustomAppender extends AbstractAppender {
 		super(
 			"MCWebSocketAppender",
 			null,
-			PatternLayout.newBuilder().withPattern("%msg").build(),
+			PatternLayout.newBuilder().withPattern("%msg %M %C").build(),
 			false
 		);
 		
@@ -31,12 +31,12 @@ public class CustomAppender extends AbstractAppender {
 	@Override
 	public void append(LogEvent event) {	
 		event = event.toImmutable();
-		StackTraceElement source = event.getSource();
+		StackTraceElement element = event.getSource();
 		plugin.getWSServer().broadcastMessage(new ConsoleMessage(
 			event.getThreadName(),
 			event.getLevel().toString(),
 			event.getMessage().getFormattedMessage(),
-			source != null ? source.getClassName() : ""
+			element == null ? "Unknown" : element.getClassName() + "#" + element.getMethodName() + ":" + element.getLineNumber()
 		), AccessLevel.CONSOLE_READONLY);
 	}
 	
