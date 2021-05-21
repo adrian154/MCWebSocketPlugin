@@ -4,11 +4,11 @@ import com.drain.MCWebSocketPlugin.messages.inbound.Request;
 
 public class ErrorResponse extends Response {
 
-	private String message;
+	private String error;
 	
 	public ErrorResponse(String message, Request request) {
 		super(request);
-		this.message = message;
+		this.error = message;
 	}
 	
 }
