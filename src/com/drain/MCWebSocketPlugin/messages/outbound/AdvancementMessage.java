@@ -8,7 +8,7 @@ public class AdvancementMessage extends OnePlayerMessage {
 	
 	public AdvancementMessage(PlayerAdvancementDoneEvent event) {
 		super("advancement", event.getPlayer());
-		this.key = event.getAdvancement().getKey().toString();
+		this.key = event.getAdvancement().getKey().getKey();
 	}
 	
 }

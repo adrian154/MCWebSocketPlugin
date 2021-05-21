@@ -12,10 +12,6 @@ import com.drain.MCWebSocketPlugin.messages.outbound.Response;
 
 public class AuthRequest extends Request {
 
-	// errors
-	private static final String ALREADY_AUTHED = "{\"error\": \"Already authenticated\"}";
-	private static final String NO_SUCH_CLIENT = "{\"error\": \"No such client\"}";
-	
 	private String clientID, secret;
 	
 	@Override

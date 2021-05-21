@@ -37,17 +37,4 @@ public class OnlinePlayersRequest extends Request {
 			
 	}
 	
-	@SuppressWarnings("unused")
-	private static class PlayerPair {
-		
-		public UUID uuid;
-		public String name;
-		
-		public PlayerPair(Player player) {
-			this.uuid = player.getUniqueId();
-			this.name = player.getName();
-		}
-		
-	}
-	
 }
