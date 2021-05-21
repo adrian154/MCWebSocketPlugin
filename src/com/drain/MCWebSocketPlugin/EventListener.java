@@ -8,7 +8,6 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.drain.MCWebSocketPlugin.Configuration.AccessLevel;
 import com.drain.MCWebSocketPlugin.messages.outbound.AdvancementMessage;
@@ -31,7 +30,7 @@ public class EventListener implements Listener {
 	}
 	
 	@EventHandler(priority=EventPriority.MONITOR)
-	public void onPlayerQuitEvent(PlayerQuitEvent event) {
+	public void onPlayerQuitEvent(org.bukkit.event.player.PlayerQuitEvent event) {
 		plugin.getWSServer().broadcastMessage(new PlayerQuitMessage(event), AccessLevel.GAME_INFO);
 	}
 	

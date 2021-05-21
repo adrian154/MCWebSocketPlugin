@@ -1,6 +1,6 @@
 package com.drain.MCWebSocketPlugin.messages.outbound;
 
-public class ConsoleMessage extends OutboundMessage {
+public class ConsoleMessage extends EventMessage {
 
 	public String threadName;
 	public String level;

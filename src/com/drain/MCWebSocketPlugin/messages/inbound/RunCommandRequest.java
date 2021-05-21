@@ -2,25 +2,27 @@ package com.drain.MCWebSocketPlugin.messages.inbound;
 
 import org.java_websocket.WebSocket;
 
-import com.drain.MCWebSocketPlugin.MCWebSocketPlugin;
 import com.drain.MCWebSocketPlugin.Configuration.AccessLevel;
+import com.drain.MCWebSocketPlugin.MCWebSocketPlugin;
+import com.drain.MCWebSocketPlugin.messages.outbound.ErrorResponse;
+import com.drain.MCWebSocketPlugin.messages.outbound.Response;
 
-public class RunCommandMessage extends InboundMessage {
+public class RunCommandRequest extends Request {
 
 	private String command;
 	
 	@Override
-	public void handle(MCWebSocketPlugin plugin, WebSocket socket) {
+	public Response handle(MCWebSocketPlugin plugin, WebSocket socket) {
 		
 		if(!plugin.getWSServer().getAccess(socket).contains(AccessLevel.CONSOLE)) { 
-			socket.send(NOT_AUTHORIZED);
+			return new ErrorResponse("Not authorized", this);
 		}
 		
 		if(command != null) {
 			plugin.getServer().getScheduler().runTask(plugin, new RunCommandTask(plugin, command));
-			socket.send(SUCCESS);
+			return new Response(this);
 		} else {
-			socket.send(INVALID_FIELDS);
+			return new ErrorResponse("Missing fields", this);
 		}
 		
 	}

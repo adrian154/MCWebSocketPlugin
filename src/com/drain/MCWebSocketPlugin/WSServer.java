@@ -14,8 +14,8 @@ import org.java_websocket.server.WebSocketServer;
 
 import com.drain.MCWebSocketPlugin.Configuration.AccessLevel;
 import com.drain.MCWebSocketPlugin.Configuration.Client;
-import com.drain.MCWebSocketPlugin.messages.inbound.InboundMessage;
-import com.drain.MCWebSocketPlugin.messages.outbound.OutboundMessage;
+import com.drain.MCWebSocketPlugin.messages.inbound.Request;
+import com.drain.MCWebSocketPlugin.messages.outbound.EventMessage;
 import com.google.gson.JsonSyntaxException;
 
 public class WSServer extends WebSocketServer {
@@ -69,7 +69,7 @@ public class WSServer extends WebSocketServer {
 		clients.put(socket, client);
 	}
 	
-	public void broadcastMessage(OutboundMessage message, AccessLevel minimum) {
+	public void broadcastMessage(EventMessage message, AccessLevel minimum) {
 		String json = plugin.getGson().toJson(message);
 		for(WebSocket conn: clients.keySet()) {
 			if(clients.get(conn).getAccess().contains(minimum)) {
@@ -92,8 +92,8 @@ public class WSServer extends WebSocketServer {
 	@Override
 	public void onMessage(WebSocket socket, String strMessage) {
 		try {
-			InboundMessage message = plugin.getGson().fromJson(strMessage, InboundMessage.class);
-			message.execute(plugin, socket, strMessage);
+			Request message = plugin.getGson().fromJson(strMessage, Request.class);
+			socket.send(message.handle(plugin, socket, strMessage).toString());
 		} catch(JsonSyntaxException excption) {
 			plugin.getLogger().warning("Ignoring malformed message");
 		}
@@ -119,7 +119,9 @@ public class WSServer extends WebSocketServer {
 		}
 
 		@Override
-		public void onOpen(ServerHandshake handshake) { }
+		public void onOpen(ServerHandshake handshake) {
+			this.send(plugin.getMCWSConfig().getServerIDSecret());
+		}
 		
 		@Override
 		public void onMessage(String message) {

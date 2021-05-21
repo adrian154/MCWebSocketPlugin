@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import org.bukkit.OfflinePlayer;
 
-public class OnePlayerMessage extends OutboundMessage {
+public class OnePlayerMessage extends EventMessage {
 
 	public UUID uuid;
 	public String playerName;

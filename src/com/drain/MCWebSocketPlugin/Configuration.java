@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -42,6 +43,10 @@ public class Configuration {
 		public static AccessLevel fromInt(int level) {
 			if(level < 0 || level >= AccessLevel.values().length) throw new IllegalArgumentException();
 			return AccessLevel.values()[level];
+		}
+		
+		public int toInt() {
+			return this.level;
 		}
 		
 	};
@@ -102,6 +107,7 @@ public class Configuration {
 	public int getPort() { return config.port; }
 	public AccessLevel getDefaultAccess() { return config.defaultAccessLevel; }
 	public Client getClient(String name) { return config.clients.get(name); }
+	public String getServerIDSecret() { return config.serverIDSecret; }
 	
 	// --- inner classes
 	private class ConfigContainer {
@@ -111,13 +117,22 @@ public class Configuration {
 		public transient AccessLevel defaultAccessLevel;
 		public int defaultAccess;
 		public int port;
+		public String serverIDSecret;
 		
 		public ConfigContainer() {
+			
+			// defaults
 			clients = new HashMap<String, Client>();
 			outgoingHosts = new ArrayList<String>();
-			port = 17224;
+			port = 1738;
 			defaultAccess = AccessLevel.NONE.ordinal();
 			defaultAccessLevel = AccessLevel.NONE;
+			
+			byte[] serverIDSecretBuf = new byte[64];
+			SecureRandom random = new SecureRandom();
+			random.nextBytes(serverIDSecretBuf);
+			serverIDSecret = Base64.getEncoder().encodeToString(serverIDSecretBuf);
+		
 		}
 		
 		public void afterLoad() {
@@ -164,6 +179,7 @@ public class Configuration {
 			byte[] hashed = hashKey(key);
 			
 			// a pitiful attempt at an equal time comparison
+			// why even bother :-|
 			boolean equal = true;
 			for(int i = 0; i < hashed.length; i++) {
 				if(hashed[i] != secretHash[i]) equal = false;
