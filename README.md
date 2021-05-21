@@ -23,6 +23,8 @@ There are four levels of access that clients can have:
 
 Usage: `/mcws-addclient <client name> <access level>`
 
+Permission node: `mcws.addclient`
+
 The server will generate a new secret key for that client and store it in the configuration file. Applications can then connect using that ID-secret combo. 
 
 The client ID  must be one word, with no spaces.
@@ -33,11 +35,15 @@ The generated key will be sent to the command sender only and is **never logged*
 
 Usage: `/mcws-reload`
 
+Permission node: `mcws.reload`
+
 The configuration file will be reloaded, and the server will re-attempt to connect to any outgoing hosts which are not currently connected.
 
 ## `/mcws-status`
 
 Usage: `/mcws-status`
+
+Permission node: `mcws.status`
 
 The server will list all active client connections. Only authenticated clients will be listed.
 
