@@ -3,7 +3,7 @@ name: MCWebSocketPlugin
 version: 1.0
 author: drain
 description: "Platform for building websocket-based integrations for Minecraft"
-api-version: 1.16
+api-version: 1.17
 commands:
     mcws-reload:
         description: Reload the configuration for MCWebSocket
