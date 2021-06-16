@@ -26,6 +26,7 @@ public class Request {
 		inboundMessages.put("auth", AuthRequest.class); 
 		inboundMessages.put("runCommand", RunCommandRequest.class);
 		inboundMessages.put("getOnline", OnlinePlayersRequest.class);
+		inboundMessages.put("setAutosave", ToggleAutosaveRequest.class);
 	}
 	
 	public final Response handle(MCWebSocketPlugin plugin, WebSocket socket, String json) {
