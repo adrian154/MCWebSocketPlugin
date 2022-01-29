@@ -5,9 +5,9 @@ import java.util.Map;
 
 import org.java_websocket.WebSocket;
 
-import com.drain.MCWebSocketPlugin.MCWebSocketPlugin;
 import com.drain.MCWebSocketPlugin.messages.outbound.ErrorResponse;
 import com.drain.MCWebSocketPlugin.messages.outbound.Response;
+import com.drain.bitcraft.BitcraftPlugin;
 import com.google.gson.JsonSyntaxException;
 
 public class Request {
@@ -29,7 +29,7 @@ public class Request {
 		inboundMessages.put("setAutosave", ToggleAutosaveRequest.class);
 	}
 	
-	public final Response handle(MCWebSocketPlugin plugin, WebSocket socket, String json) {
+	public final Response handle(BitcraftPlugin plugin, WebSocket socket, String json) {
 		Class<? extends Request> clazz = inboundMessages.get(action);
 		if(clazz != null) {
 			try {
@@ -42,7 +42,7 @@ public class Request {
 		return new ErrorResponse("Unknown action", this);
 	}
 
-	public Response handle(MCWebSocketPlugin plugin, WebSocket socket) {
+	public Response handle(BitcraftPlugin plugin, WebSocket socket) {
 		throw new UnsupportedOperationException();
 	}
 	

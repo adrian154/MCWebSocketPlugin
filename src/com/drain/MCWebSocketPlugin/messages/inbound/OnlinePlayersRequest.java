@@ -8,15 +8,15 @@ import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.java_websocket.WebSocket;
 
-import com.drain.MCWebSocketPlugin.Configuration.AccessLevel;
-import com.drain.MCWebSocketPlugin.MCWebSocketPlugin;
 import com.drain.MCWebSocketPlugin.messages.outbound.ErrorResponse;
 import com.drain.MCWebSocketPlugin.messages.outbound.Response;
+import com.drain.bitcraft.BitcraftPlugin;
+import com.drain.bitcraft.Configuration.AccessLevel;
 
 public class OnlinePlayersRequest extends Request {
 
 	@Override
-	public Response handle(MCWebSocketPlugin plugin, WebSocket socket) {
+	public Response handle(BitcraftPlugin plugin, WebSocket socket) {
 		
 		if(plugin.getWSServer().getAccess(socket).contains(AccessLevel.GAME_INFO)) {
 			return new PlayersResponse(plugin.getServer(), this);		

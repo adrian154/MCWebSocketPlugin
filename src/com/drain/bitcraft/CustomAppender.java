@@ -1,4 +1,4 @@
-package com.drain.MCWebSocketPlugin;
+package com.drain.bitcraft;
 
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Core;
@@ -7,15 +7,15 @@ import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
-import com.drain.MCWebSocketPlugin.Configuration.AccessLevel;
 import com.drain.MCWebSocketPlugin.messages.outbound.ConsoleMessage;
+import com.drain.bitcraft.Configuration.AccessLevel;
 
 @Plugin(name="MCWebSocketAppender", category=Core.CATEGORY_NAME, elementType=Appender.ELEMENT_TYPE)
 public class CustomAppender extends AbstractAppender {
 
-	private MCWebSocketPlugin plugin;
+	private BitcraftPlugin plugin;
 	
-	public CustomAppender(MCWebSocketPlugin plugin) {
+	public CustomAppender(BitcraftPlugin plugin) {
 		
 		super(
 			"MCWebSocketAppender",

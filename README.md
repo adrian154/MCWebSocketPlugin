@@ -1,10 +1,17 @@
-# MCWebSocketPlguin
+# MC-RPC
 
-MCWebSocket aims to provide a simple platform for building Websocket-based Minecraft integrations.
+Are you a developer creating an application that needs to communicate with a Minecraft server? MC-RPC is exactly what you need!
+
+MC-RPC exposes an API that lets you use [JSON-RPC 2.0](https://www.jsonrpc.org/specification) to interact with a Minecraft server. You can register custom methods and broadcast notifications without worrying about the underlying connection and transport logic.
 
 [**DOWNLOADS HERE**](https://github.com/adrian154/MCWebSocketPlugin/releases)
 
 # Basic usage
+
+MCWS allows applications to connect to servers via WebSocket and send messages serialized using JSON. There are three main types of messages:
+* **Events**, messages broadcasted by the server to inform the client that something has happened.
+* **Requests**, messages sent by the client asking the server to do something
+* **Responses**, messages sent by the server indicating whether a request was successful
 
 The MCWS protocol is very simple. Clients connect to the server and send requests; the server replies with messages indicating whether the request was successful. The server will also send game events like player deaths or console messages.
 

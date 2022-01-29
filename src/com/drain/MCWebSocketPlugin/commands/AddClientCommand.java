@@ -8,16 +8,16 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import com.drain.MCWebSocketPlugin.Configuration.AccessLevel;
-import com.drain.MCWebSocketPlugin.MCWebSocketPlugin;
+import com.drain.bitcraft.BitcraftPlugin;
+import com.drain.bitcraft.Configuration.AccessLevel;
 
 import net.md_5.bungee.api.ChatColor;
 
 public class AddClientCommand implements CommandExecutor {
 
-	public MCWebSocketPlugin plugin;
+	private BitcraftPlugin plugin;
 	
-	public AddClientCommand(MCWebSocketPlugin plugin) {
+	public AddClientCommand(BitcraftPlugin plugin) {
 		this.plugin = plugin;
 	}
 	
@@ -42,7 +42,7 @@ public class AddClientCommand implements CommandExecutor {
 			return true;
 		}
 			
-		if(plugin.getMCWSConfig().getClient(args[0]) != null) {
+		if(plugin.config().getClient(args[0]) != null) {
 			sender.sendMessage(ChatColor.RED + "A client with that ID exists already!");
 			return true;
 		}
@@ -52,7 +52,7 @@ public class AddClientCommand implements CommandExecutor {
 		random.nextBytes(keyBuffer);
 		
 		try {
-			plugin.getMCWSConfig().addCredentials(args[0], keyBuffer, level);
+			plugin.config().addCredentials(args[0], keyBuffer, level);
 			sender.sendMessage(ChatColor.GREEN + "Generated new client. Its secret key is " + ChatColor.YELLOW + Base64.getEncoder().encodeToString(keyBuffer));
 			sender.sendMessage(ChatColor.RED + "Store this key right now, as you will not be able to access it again. Make sure it hasn't been logged somewhere on your machine.");
 		} catch(IOException exception) {

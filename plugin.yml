@@ -1,12 +1,13 @@
-main: com.drain.MCWebSocketPlugin.MCWebSocketPlugin
-name: MCWebSocketPlugin
+main: com.drain.bitcraft.BitcraftPlugin
+name: BitcraftPlugin
+depend: [dynmap]
 version: 1.0
 author: drain
 description: "Platform for building websocket-based integrations for Minecraft"
 api-version: 1.17
 commands:
     mcws-reload:
-        description: Reload the configuration for MCWebSocket
+        description: Reload the configuration
         usage: /mcws-reload
         permission: mcws.reload
     mcws-addclient:
@@ -17,3 +18,27 @@ commands:
         description: Lists clients currently connected to the server through MCWS
         usage: /mcws-status
         permission: mcws.status
+    msg:
+        description: Custom message command
+        usage: /msg <player> <message>
+    tell:
+        description: Custom message command
+        usage: /tell <player> <message>
+    w:
+        description: Custom message command
+        usage: /w <player> <message>
+    setmarker:
+        description: Add a marker to the Dynmap
+        usage: /setmarker <icon> <name>
+    markers:
+        description: List markers you've added to the Dynmap
+        usage: /markers
+    clearmarker:
+        description: Removes a marker from the Dynmap
+        usage: /clearmarker <icon> <name>
+    g:
+        description: Manage your group
+        usage: Do /g
+    gc:
+        description: Send a message to your group or switch to the group channel.
+        usage: /gc [message]

@@ -7,16 +7,16 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.java_websocket.WebSocket;
 
-import com.drain.MCWebSocketPlugin.Configuration.Client;
-import com.drain.MCWebSocketPlugin.MCWebSocketPlugin;
+import com.drain.bitcraft.BitcraftPlugin;
+import com.drain.bitcraft.Configuration.Client;
 
 import net.md_5.bungee.api.ChatColor;
 
 public class StatusCommand implements CommandExecutor {
 	
-	private MCWebSocketPlugin plugin;
+	private BitcraftPlugin plugin;
 	
-	public StatusCommand(MCWebSocketPlugin plugin) {
+	public StatusCommand(BitcraftPlugin plugin) {
 		this.plugin = plugin;
 	}
 	

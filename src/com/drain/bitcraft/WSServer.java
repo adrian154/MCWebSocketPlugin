@@ -1,4 +1,4 @@
-package com.drain.MCWebSocketPlugin;
+package com.drain.bitcraft;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -12,21 +12,21 @@ import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.handshake.ServerHandshake;
 import org.java_websocket.server.WebSocketServer;
 
-import com.drain.MCWebSocketPlugin.Configuration.AccessLevel;
-import com.drain.MCWebSocketPlugin.Configuration.Client;
 import com.drain.MCWebSocketPlugin.messages.inbound.Request;
 import com.drain.MCWebSocketPlugin.messages.outbound.EventMessage;
+import com.drain.bitcraft.Configuration.AccessLevel;
+import com.drain.bitcraft.Configuration.Client;
 import com.google.gson.JsonSyntaxException;
 
 public class WSServer extends WebSocketServer {
 
 	// --- fields
-	private MCWebSocketPlugin plugin;
+	private BitcraftPlugin plugin;
 	private Map<WebSocket, Client> clients;
 	private Map<String, WebSocket> outgoing;
 	
 	// --- constructors
-	public WSServer(InetSocketAddress addr, MCWebSocketPlugin plugin) {
+	public WSServer(InetSocketAddress addr, BitcraftPlugin plugin) {
 		super(addr);
 		this.plugin = plugin;
 		this.clients = new HashMap<WebSocket, Client>();
@@ -46,7 +46,7 @@ public class WSServer extends WebSocketServer {
 	}
 	
 	public void connectOutgoing() {
-		for(String host: plugin.getMCWSConfig().getOutgoingHosts()) {
+		for(String host: plugin.config().getOutgoingHosts()) {
 			WebSocket socket = outgoing.get(host);
 			if(socket == null || !socket.isOpen()) {
 				try {
@@ -120,7 +120,7 @@ public class WSServer extends WebSocketServer {
 
 		@Override
 		public void onOpen(ServerHandshake handshake) {
-			this.send(plugin.getMCWSConfig().getServerIDSecret());
+			this.send(plugin.config().getServerIDSecret());
 		}
 		
 		@Override

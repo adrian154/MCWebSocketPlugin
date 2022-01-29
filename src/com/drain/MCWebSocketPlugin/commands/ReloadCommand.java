@@ -6,15 +6,15 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import com.drain.MCWebSocketPlugin.MCWebSocketPlugin;
+import com.drain.bitcraft.BitcraftPlugin;
 
 import net.md_5.bungee.api.ChatColor;
 
 public class ReloadCommand implements CommandExecutor {
 	
-	private MCWebSocketPlugin plugin;
+	private BitcraftPlugin plugin;
 	
-	public ReloadCommand(MCWebSocketPlugin plugin) {
+	public ReloadCommand(BitcraftPlugin plugin) {
 		this.plugin = plugin;
 	}
 	
@@ -27,7 +27,7 @@ public class ReloadCommand implements CommandExecutor {
 		}
 		
 		try {
-			plugin.getMCWSConfig().reload();
+			plugin.config().reload();
 			plugin.getWSServer().connectOutgoing();
 			sender.sendMessage(ChatColor.GREEN + "Finished reloading!");
 		} catch(IOException exception) {

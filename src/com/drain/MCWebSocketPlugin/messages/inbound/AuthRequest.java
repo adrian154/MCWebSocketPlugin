@@ -4,18 +4,18 @@ import java.util.Base64;
 
 import org.java_websocket.WebSocket;
 
-import com.drain.MCWebSocketPlugin.Configuration.AccessLevel;
-import com.drain.MCWebSocketPlugin.Configuration.Client;
-import com.drain.MCWebSocketPlugin.MCWebSocketPlugin;
 import com.drain.MCWebSocketPlugin.messages.outbound.ErrorResponse;
 import com.drain.MCWebSocketPlugin.messages.outbound.Response;
+import com.drain.bitcraft.BitcraftPlugin;
+import com.drain.bitcraft.Configuration.AccessLevel;
+import com.drain.bitcraft.Configuration.Client;
 
 public class AuthRequest extends Request {
 
 	private String clientID, secret;
 	
 	@Override
-	public Response handle(MCWebSocketPlugin plugin, WebSocket socket) {
+	public Response handle(BitcraftPlugin plugin, WebSocket socket) {
 		
 		if(plugin.getWSServer().getClient(socket) != null) {
 			return new ErrorResponse("Already authenticated", this);
@@ -32,7 +32,7 @@ public class AuthRequest extends Request {
 			return new ErrorResponse("Improperly formatted secret", this);
 		}
 		
-		Client client = plugin.getMCWSConfig().getClient(clientID);
+		Client client = plugin.config().getClient(clientID);
 		if(client == null) {
 			return new ErrorResponse("No such client", this);
 		}

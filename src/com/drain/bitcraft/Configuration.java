@@ -1,4 +1,4 @@
-package com.drain.MCWebSocketPlugin;
+package com.drain.bitcraft;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +13,11 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
+import org.bukkit.ChatColor;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -103,27 +108,101 @@ public class Configuration {
 		save();
 	}
 
+	public void addGroup(Group group) throws IOException {
+		config.groups.add(group);
+		save();
+	}
+
+	public void addPlayerToGroup(UUID uuid, Group group) throws IOException {
+		group.addMember(uuid);
+		config.groupMap.put(uuid, group);
+		save();
+	}
+	
+	public void removePlayerFromGroup(UUID uuid, Group group) throws IOException {
+		group.members.remove(uuid);
+		config.groupMap.put(uuid, null);
+		save();
+	}
+	
+	public Group getGroup(UUID uuid) {
+		return config.groupMap.get(uuid);
+	}
+	
+	public Group getGroup(String groupName) {
+		for(Group group: config.groups) {
+			if(group.name.equalsIgnoreCase(groupName)) {
+				return group;
+			}
+		}
+		return null;
+	}
+	
+	public void updateName(Player player) {
+		Group group = this.getGroup(player.getUniqueId());
+		if(group != null) {
+			String name = group.getColor() + "[" + group.getName() + "] " + player.getName();
+			player.setDisplayName(name);
+			player.setPlayerListName(" " + name);
+		} else {
+			player.setDisplayName(player.getName());
+			player.setPlayerListName(null);
+		}
+	}
+	
+	public void refreshGroupname(Group group, BitcraftPlugin plugin) {
+		for(UUID uuid: group.members) {
+			Player player = plugin.getServer().getPlayer(uuid);
+			if(player != null) {
+				updateName(player);
+			}
+		}
+	}
+	
+	public void broadcastToGroup(Group group, String string, BitcraftPlugin plugin) {
+		for(UUID uuid: group.members) {
+			Player player = plugin.getServer().getPlayer(uuid);
+			if(player != null) {
+				player.sendMessage(string);
+				player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0F, 1.5F);
+			}
+		}
+	}
+	
 	public List<String> getOutgoingHosts() { return config.outgoingHosts; }
 	public int getPort() { return config.port; }
 	public AccessLevel getDefaultAccess() { return config.defaultAccessLevel; }
 	public Client getClient(String name) { return config.clients.get(name); }
 	public String getServerIDSecret() { return config.serverIDSecret; }
 	
+	public List<Integer> getMarkers(UUID uuid) {
+		if(config.markers.get(uuid) == null) {
+			config.markers.put(uuid, new ArrayList<>());
+		}
+		return config.markers.get(uuid);
+	}
+	
 	// --- inner classes
 	private class ConfigContainer {
 		
 		public Map<String, Client> clients;
+		private List<Group> groups;
+		public Map<UUID, List<Integer>> markers;
 		public List<String> outgoingHosts;
-		public transient AccessLevel defaultAccessLevel;
 		public int defaultAccess;
 		public int port;
 		public String serverIDSecret;
 		
+		public transient Map<UUID, Group> groupMap;
+		public transient AccessLevel defaultAccessLevel;
+		
 		public ConfigContainer() {
 			
 			// defaults
-			clients = new HashMap<String, Client>();
-			outgoingHosts = new ArrayList<String>();
+			clients = new HashMap<>();
+			markers = new HashMap<>();
+			groups = new ArrayList<>();
+			outgoingHosts = new ArrayList<>();
 			port = 1738;
 			defaultAccess = AccessLevel.NONE.ordinal();
 			defaultAccessLevel = AccessLevel.NONE;
@@ -136,10 +215,19 @@ public class Configuration {
 		}
 		
 		public void afterLoad() {
+			
 			defaultAccessLevel = AccessLevel.fromInt(defaultAccess);
 			for(Client client: clients.values()) {
 				client.complete();
 			}
+			
+			this.groupMap = new HashMap<>();
+			for(Group group: groups) {
+				for(UUID uuid: group.members) {
+					groupMap.put(uuid,  group);
+				}
+			}
+		
 		}
 		
 	}
@@ -191,6 +279,61 @@ public class Configuration {
 		
 		public String getID() { return clientID; }
 		public AccessLevel getAccess() { return access; }
+		
+	}
+	
+	public static class Group {
+		
+		private List<UUID> members;
+		private String name;
+		private ChatColor color;
+		private UUID admin;
+		
+		public Group(String name) {
+			this.name = name;
+			this.members = new ArrayList<>();
+			this.color = ChatColor.YELLOW;
+		}
+		
+		public ChatColor getColor() {
+			return color;
+		}
+		
+		public void setColor(ChatColor color) {
+			this.color = color;
+		}
+		
+		public String getDisplayName() {
+			return color + name;
+		}
+		
+		public String getName() {
+			return name;
+		}
+		
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public List<UUID> getMembers() {
+			return members;
+		}
+		
+		public boolean isAdmin(UUID uuid) {
+			return admin.equals(uuid);
+		}
+		
+		public void setAdmin(UUID uuid) {
+			this.admin = uuid;
+		}
+		
+		protected void addMember(UUID uuid) {
+			this.members.add(uuid);
+		}
+		
+		protected void removeMember(UUID uuid) {
+			this.members.remove(uuid);
+		}
 		
 	}
 
